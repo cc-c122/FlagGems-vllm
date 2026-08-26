@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from flaggems_vllm.runtime.backend._metax.ops.flashmla_sparse import (
+    flash_mla_sparse_fwd,
+)
 from flaggems_vllm.runtime.backend._metax.ops.per_token_group_quant_fp8 import (
     SUPPORTED_FP8_DTYPE,
     per_token_group_quant_fp8,
@@ -20,6 +23,7 @@ from flaggems_vllm.runtime.backend._metax.ops.scaled_int8_quant import scaled_in
 
 __all__ = [
     "SUPPORTED_FP8_DTYPE",
+    "flash_mla_sparse_fwd",
     "per_token_group_quant_fp8",
     "scaled_int8_quant",
 ]
