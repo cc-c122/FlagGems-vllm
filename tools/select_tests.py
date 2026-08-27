@@ -116,6 +116,18 @@ EXPLICIT_SOURCE_TO_TESTS = {
     "src/flaggems_vllm/runtime/backend/_metax/fused/fused_moe.py": [
         "tests/test_fused_experts_impl.py",
     ],
+    "src/flaggems_vllm/runtime/backend/_metax/ops/minimax_sparse_attention/__init__.py": [
+        "tests/test_minimax_m3_sparse_attention.py",
+    ],
+    "src/flaggems_vllm/runtime/backend/_metax/ops/minimax_sparse_attention/index_topk.py": [
+        "tests/test_minimax_m3_sparse_attention.py",
+    ],
+    "src/flaggems_vllm/runtime/backend/_metax/ops/minimax_sparse_attention/sparse_attn.py": [
+        "tests/test_minimax_m3_sparse_attention.py",
+    ],
+    "src/flaggems_vllm/runtime/backend/_metax/ops/minimax_sparse_attention/utils.py": [
+        "tests/test_minimax_m3_sparse_attention.py",
+    ],
 }
 
 # Same for benchmarks: keep explicit entries only for non-standard names that cannot be inferred from the source stem.
@@ -168,6 +180,18 @@ EXPLICIT_SOURCE_TO_BENCHMARKS = {
     ],
     "src/flaggems_vllm/runtime/backend/_metax/fused/fused_moe.py": [
         "benchmark/test_fused_moe.py",
+    ],
+    "src/flaggems_vllm/runtime/backend/_metax/ops/minimax_sparse_attention/__init__.py": [
+        "benchmark/test_minimax_m3_sparse_attention.py",
+    ],
+    "src/flaggems_vllm/runtime/backend/_metax/ops/minimax_sparse_attention/index_topk.py": [
+        "benchmark/test_minimax_m3_sparse_attention.py",
+    ],
+    "src/flaggems_vllm/runtime/backend/_metax/ops/minimax_sparse_attention/sparse_attn.py": [
+        "benchmark/test_minimax_m3_sparse_attention.py",
+    ],
+    "src/flaggems_vllm/runtime/backend/_metax/ops/minimax_sparse_attention/utils.py": [
+        "benchmark/test_minimax_m3_sparse_attention.py",
     ],
 }
 

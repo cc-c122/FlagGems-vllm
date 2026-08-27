@@ -1,4 +1,5 @@
 # Copyright 2026 FlagOS Contributors
+# Copyright contributors to the vLLM project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,36 +13,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from flaggems_vllm.runtime.backend._metax.ops.compress_norm_mrope import (
-    qwen4_compress_norm_mrope_store_groups,
-)
-from flaggems_vllm.runtime.backend._metax.ops.minimax_sparse_attention import (
+"""MiniMax M3 Sparse Attention with a paged KV cache.
+
+The cache layout is compatible with vLLM:
+  kv_cache: [num_blocks, num_kv_heads, 128, 2*head_dim]  K=[..., :head_dim] V=[..., head_dim:]
+  index_kv_cache: [num_blocks, 128, head_dim]
+  block_table: [batch, max_blocks]
+"""
+
+from .index_topk import (
+    SPARSE_BLOCK_SIZE,
     minimax_m3_index_decode,
     minimax_m3_index_decode_score,
     minimax_m3_index_score,
     minimax_m3_index_topk,
-    minimax_m3_sparse_attn,
-    minimax_m3_sparse_attn_decode,
 )
-from flaggems_vllm.runtime.backend._metax.ops.per_token_group_quant_fp8 import (
-    SUPPORTED_FP8_DTYPE,
-    per_token_group_quant_fp8,
-)
-from flaggems_vllm.runtime.backend._metax.ops.ple_state import ple_state_scatter_
-from flaggems_vllm.runtime.backend._metax.ops.qsa_mqa import qwen4_qsa_mqa_paged_dot
-from flaggems_vllm.runtime.backend._metax.ops.scaled_int8_quant import scaled_int8_quant
+from .sparse_attn import minimax_m3_sparse_attn, minimax_m3_sparse_attn_decode
 
 __all__ = [
-    "SUPPORTED_FP8_DTYPE",
+    "SPARSE_BLOCK_SIZE",
     "minimax_m3_index_decode",
     "minimax_m3_index_decode_score",
     "minimax_m3_index_score",
     "minimax_m3_index_topk",
     "minimax_m3_sparse_attn",
     "minimax_m3_sparse_attn_decode",
-    "per_token_group_quant_fp8",
-    "ple_state_scatter_",
-    "qwen4_qsa_mqa_paged_dot",
-    "qwen4_compress_norm_mrope_store_groups",
-    "scaled_int8_quant",
 ]
