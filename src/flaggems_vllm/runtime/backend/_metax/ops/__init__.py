@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from flaggems_vllm.runtime.backend._metax.ops.chunk_gdn2 import chunk_gdn2
 from flaggems_vllm.runtime.backend._metax.ops.compress_norm_mrope import (
     qwen4_compress_norm_mrope_store_groups,
 )
@@ -23,6 +24,7 @@ from flaggems_vllm.runtime.backend._metax.ops.scaled_int8_quant import scaled_in
 
 __all__ = [
     "SUPPORTED_FP8_DTYPE",
+    "chunk_gdn2",
     "per_token_group_quant_fp8",
     "qwen4_compress_norm_mrope_store_groups",
     "scaled_int8_quant",

@@ -8,12 +8,14 @@ import torch
 import triton
 import triton.language as tl
 
+from flaggems_vllm import runtime
 from flaggems_vllm.ops.FLA.index import prepare_chunk_indices, prepare_chunk_offsets
 from flaggems_vllm.ops.FLA.triton_ops_helper import exp
 from flaggems_vllm.ops.FLA.utils import use_cuda_graph
 from flaggems_vllm.utils import libentry, libtuner
 
 NUM_WARPS = [2, 4, 8, 16]
+NUM_STAGES = [1] if runtime.device.vendor_name == "metax" else [2, 3, 4]
 
 
 @libentry()
@@ -31,7 +33,7 @@ NUM_WARPS = [2, 4, 8, 16]
     configs=[
         triton.Config({"BV": BV}, num_warps=num_warps, num_stages=num_stages)
         for num_warps in [2, 4]
-        for num_stages in [2, 3, 4]
+        for num_stages in NUM_STAGES
         for BV in [32, 64]
     ],
     key=[

@@ -19,10 +19,12 @@ import pytest
 import torch
 
 import flaggems_vllm
-from flaggems_vllm.ops.FLA import chunk_gdn2
+from flaggems_vllm.ops.FLA import chunk_gdn2 as generic_chunk_gdn2
 from flaggems_vllm.ops.FLA.gdn2_native.chunk_fwd import chunk_gdn2_fwd
 
 ASSERT_RATIO = 0.01
+chunk_gdn2 = getattr(flaggems_vllm, "chunk_gdn2", generic_chunk_gdn2)
+IS_METAX_GDN2 = chunk_gdn2.__module__.startswith("flaggems_vllm.runtime.backend._metax")
 
 GDN2_TEST_SHAPES = [
     (2, 512, 8, 64, 64),
@@ -52,7 +54,7 @@ pytestmark = [
 
 
 def _set_public_gdn2_native_for_call(force_native: bool):
-    module = importlib.import_module("flaggems_vllm.ops.FLA.chunk_gdn2")
+    module = importlib.import_module(chunk_gdn2.__module__)
     old = module.HAS_TLE_GDN2
     if force_native:
         module.HAS_TLE_GDN2 = False
@@ -170,6 +172,45 @@ def _assert_close(name: str, actual: torch.Tensor, expected: torch.Tensor) -> No
     )
 
 
+@pytest.mark.skipif(not IS_METAX_GDN2, reason="MetaX-specific dispatch test")
+def test_metax_chunk_gdn2_rejects_noncontiguous_input():
+    args, kwargs = _make_inputs(
+        B=2,
+        T=16,
+        H=1,
+        K=64,
+        V=64,
+        dtype=torch.float16,
+        state_v_first=False,
+    )
+    q, k, v, g, b, w = args
+    q = q.transpose(0, 1).contiguous().transpose(0, 1)
+
+    with pytest.raises(NotImplementedError, match="requires contiguous q"):
+        chunk_gdn2(q, k, v, g, b, w, **kwargs)
+
+
+@pytest.mark.skipif(not IS_METAX_GDN2, reason="MetaX-specific dispatch test")
+def test_metax_chunk_gdn2_rejects_native_l2norm_fallback():
+    args, kwargs = _make_inputs(
+        B=1,
+        T=16,
+        H=1,
+        K=64,
+        V=64,
+        dtype=torch.float16,
+        state_v_first=False,
+    )
+    kwargs["use_qk_l2norm_in_kernel"] = True
+
+    module, old = _set_public_gdn2_native_for_call(force_native=True)
+    try:
+        with pytest.raises(NotImplementedError, match="requires TLE"):
+            chunk_gdn2(*args, **kwargs)
+    finally:
+        module.HAS_TLE_GDN2 = old
+
+
 @pytest.mark.parametrize(
     "impl",
     [pytest.param("tle", id="tle"), pytest.param("native", id="native")],
@@ -178,7 +219,7 @@ def _assert_close(name: str, actual: torch.Tensor, expected: torch.Tensor) -> No
 @pytest.mark.parametrize("shape", GDN2_TEST_SHAPES)
 @torch.inference_mode()
 def test_chunk_gdn2_matches_native_triton(impl, dtype, shape):
-    module = importlib.import_module("flaggems_vllm.ops.FLA.chunk_gdn2")
+    module = importlib.import_module(chunk_gdn2.__module__)
     if impl == "tle" and not module.HAS_TLE_GDN2:
         pytest.skip("TLE GDN2 path is unavailable in this environment")
 

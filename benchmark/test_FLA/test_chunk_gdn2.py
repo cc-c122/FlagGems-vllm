@@ -21,14 +21,15 @@ import torch
 
 import flaggems_vllm
 from benchmark.base import Benchmark
-from flaggems_vllm.ops.FLA import chunk_gdn2
+from flaggems_vllm.ops.FLA import chunk_gdn2 as generic_chunk_gdn2
 from flaggems_vllm.ops.FLA.gdn2_native.chunk_fwd import chunk_gdn2_fwd
 
 FORCE_NATIVE_ENV = "FLAGGEMS_VLLM_GDN2_FORCE_NATIVE"
+chunk_gdn2 = getattr(flaggems_vllm, "chunk_gdn2", generic_chunk_gdn2)
 
 
 def _set_public_gdn2_native_for_call(force_native: bool):
-    module = importlib.import_module("flaggems_vllm.ops.FLA.chunk_gdn2")
+    module = importlib.import_module(chunk_gdn2.__module__)
     old = module.HAS_TLE_GDN2
     if force_native:
         module.HAS_TLE_GDN2 = False
